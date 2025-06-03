@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Giải mã AES CBC - CryptoJS</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+  <h2>Giải mã AES CBC (PBKDF2)</h2>
+  <label>Salt (hex): <input id="salt" size="50" /></label><br><br>
+  <label>IV (hex): <input id="iv" size="50" /></label><br><br>
+  <label>Passphrase: <input id="passphrase" size="50" /></label><br><br>
+  <label>CipherText (base64): <input id="cipherText" size="50" /></label><br><br>
+  <button onclick="decrypt()">Giải mã</button>
+  <p><strong>Kết quả:</strong> <span id="result"></span></p>
+
+  <script>
+    function decrypt() {
+      const saltHex = document.getElementById('salt').value.trim();
+      const ivHex = document.getElementById('iv').value.trim();
+      const passphrase = document.getElementById('passphrase').value.trim();
+      const cipherText = document.getElementById('cipherText').value.trim();
+
+      const salt = CryptoJS.enc.Hex.parse(saltHex);
+      const iv = CryptoJS.enc.Hex.parse(ivHex);
+
+      const key = CryptoJS.PBKDF2(passphrase, salt, {
+        keySize: 256 / 32,
+        iterations: 1000,
+        hasher: CryptoJS.algo.SHA1
+      });
+
+      try {
+        const decrypted = CryptoJS.AES.decrypt(cipherText, key, {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        });
+
+        const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
+        document.getElementById('result').innerText = plaintext || '[Giải mã rỗng hoặc sai khóa]';
+      } catch (e) {
+        document.getElementById('result').innerText = 'Giải mã thất bại: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
